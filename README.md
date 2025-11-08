@@ -2,6 +2,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 
+*A course project at the Department of Cartography and Geoinformatics  
+Saint Petersburg State University (SPbU).*
+
 This repository contains the source code and methodology for the research project **"Statistical Analysis of Pansharpening Method Robustness for Landscape Classification"**.
 
 The study performs a comprehensive comparative analysis of various pansharpening algorithms, evaluating their spectral fidelity, spatial quality, and robustness across different biomes (urban, forest, agricultural) using a statistical framework. The ultimate goal is to provide data-driven recommendations for selecting optimal pansharpening methods to improve the accuracy of satellite image classification.
