@@ -91,4 +91,4 @@ pansharpening-robustness-analysis/\
 
 # 📧 Контакты
 По вопросам обращайтесь по электронной почте: faninhd@yandex.ru или faninhd@gmail.com
-```
+
