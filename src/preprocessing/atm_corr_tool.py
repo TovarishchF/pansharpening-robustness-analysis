@@ -39,10 +39,9 @@ class AtmosphericCorrection:
 
     def _setup_paths(self):
         """Настройка путей для экспорта"""
-        if self.config['export']['save_intermediate']:
-            self.export_path = self.root_dir / self.config['export']['intermediate_path'] / "corrected_data"
-            self.export_path.mkdir(parents=True, exist_ok=True)
-            logger.info(f"Путь для экспорта: {self.export_path}")
+        self.export_path = self.root_dir / self.config['intermediate_path'] / "corrected_data"
+        self.export_path.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Путь для экспорта: {self.export_path}")
 
     def find_raw_scene(self) -> Optional[Path]:
         """Поиск единственной сцены Landsat в папке raw"""
@@ -179,7 +178,7 @@ class AtmosphericCorrection:
             # Открытие и обработка каналов
             band_files, band_metadata = self._open_band_files(scene_path, metadata)
 
-            # Проверка что все каналы загружены
+            # Проверка, что все каналы загружены
             expected_bands = 7  # 6 MS + 1 PAN
             if len(band_files) < expected_bands:
                 logger.error(f"Не все каналы найдены. Найдено: {len(band_files)}, ожидалось: {expected_bands}")
@@ -231,9 +230,8 @@ class AtmosphericCorrection:
                 scene_name=scene_name
             )
 
-            # Экспорт если включено
-            if self.config['export']['save_intermediate']:
-                self._export_corrected_data(corrected_data)
+            # Экспорт
+            self._export_corrected_data(corrected_data)
 
             logger.info(f"Успешно обработана сцена: {scene_name}")
             return corrected_data

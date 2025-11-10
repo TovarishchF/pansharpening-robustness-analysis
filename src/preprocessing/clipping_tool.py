@@ -42,14 +42,13 @@ class ClippingTool:
 
     def _setup_paths(self):
         """Настройка путей для экспорта"""
-        if self.config['export']['save_intermediate']:
-            self.export_path = self.root_dir / self.config['export']['intermediate_path'] / "clipped_polygons"
-            self.export_path.mkdir(parents=True, exist_ok=True)
+        self.export_path = self.root_dir / self.config['intermediate_path'] / "clipped_polygons"
+        self.export_path.mkdir(parents=True, exist_ok=True)
 
-            # Создание папок для каждого биома
-            for biome in self.config['biomes'].keys():
-                biome_path = self.export_path / biome
-                biome_path.mkdir(exist_ok=True)
+        # Создание папок для каждого биома
+        for biome in self.config['biomes'].keys():
+            biome_path = self.export_path / biome
+            biome_path.mkdir(exist_ok=True)
 
     def load_polygons(self) -> gpd.GeoDataFrame:
         """Загрузка полигонов с информацией о биомами"""
@@ -80,7 +79,7 @@ class ClippingTool:
 
     def find_corrected_data(self) -> Tuple[Path, Path]:
         """Поиск скорректированных данных"""
-        corrected_path = self.root_dir / self.config['export']['intermediate_path'] / "corrected_data"
+        corrected_path = self.root_dir / self.config['intermediate_path'] / "corrected_data"
 
         if not corrected_path.exists():
             raise FileNotFoundError(f"Путь не существует: {corrected_path}")
@@ -198,20 +197,15 @@ class ClippingTool:
             for idx in range(len(polygons_gdf)):
                 polygon_data = self._clip_single_polygon(polygons_gdf, idx, ms_src, pan_src)
                 if polygon_data:
-                    # Экспорт если включено
-                    if self.config['export']['save_intermediate']:
-                        self._export_polygon_files(polygon_data)
+                    # Экспорт
+                    self._export_polygon_files(polygon_data)
 
                     yield polygon_data
 
     def load_polygon_from_files(self, biome_name: str, fid: int) -> Optional[ClippedPolygon]:
         """
         Загрузка полигона из экспортированных файлов
-        Для использования когда save_intermediate = true
         """
-        if not self.config['export']['save_intermediate']:
-            raise RuntimeError("Файлы не сохранены (save_intermediate = false)")
-
         biome_path = self.export_path / biome_name
 
         try:

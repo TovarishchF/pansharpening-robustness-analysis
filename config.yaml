@@ -4,9 +4,7 @@ data:
   clip_polygons: "data/polygons/biome_polygons.gpkg"
   class_polygons: "data/polygons/classification_polygons.gpkg"
 
-export:
-  save_intermediate: true
-  intermediate_path: "data/intermediate"
+intermediate_path: "data/intermediate"
 
 biomes:
   urban: "Урбанизированные территории"
