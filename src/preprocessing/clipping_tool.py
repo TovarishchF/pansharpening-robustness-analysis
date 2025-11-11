@@ -8,8 +8,12 @@ import logging
 from typing import Iterator, Optional, Tuple
 from dataclasses import dataclass
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Импорт кастомного логгера
+from src.utils.logger import get_logger, setup_logging
+
+# Инициализация логгера
+setup_logging()
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -42,7 +46,7 @@ class ClippingTool:
 
     def _setup_paths(self):
         """Настройка путей для экспорта"""
-        self.export_path = self.root_dir / self.config['intermediate_path'] / "clipped_polygons"
+        self.export_path = self.root_dir / self.config['data']['intermediate'] / "clipped_polygons"
         self.export_path.mkdir(parents=True, exist_ok=True)
 
         # Создание папок для каждого биома
@@ -74,12 +78,11 @@ class ClippingTool:
 
         logger.info(f"Загружено {len(gdf)} полигонов")
         logger.info(f"Столбцы в данных: {list(gdf.columns)}")
-        logger.info(f"Пример данных: {gdf[['fid', 'biome_name']].head()}")
         return gdf
 
     def find_corrected_data(self) -> Tuple[Path, Path]:
         """Поиск скорректированных данных"""
-        corrected_path = self.root_dir / self.config['intermediate_path'] / "corrected_data"
+        corrected_path = self.root_dir / self.config['data']['intermediate'] / "corrected_data"
 
         if not corrected_path.exists():
             raise FileNotFoundError(f"Путь не существует: {corrected_path}")
@@ -182,8 +185,6 @@ class ClippingTool:
             dst.write(polygon_data.pan_data.reshape(1, *polygon_data.pan_data.shape))
             dst.set_band_description(1, 'PAN')
 
-        logger.debug(f"Экспортирован полигон {polygon_data.fid} в {biome_path.name}")
-
     def clip_all_polygons(self, polygons_gdf: gpd.GeoDataFrame) -> Iterator[ClippedPolygon]:
         """
         Обрезка всех полигонов
@@ -239,15 +240,16 @@ def main():
     """Пример использования"""
     clipper = ClippingTool()
 
-    # Загрузка полигонов
-    polygons_gdf = clipper.load_polygons()
+    try:
+        # Загрузка полигонов
+        polygons_gdf = clipper.load_polygons()
 
-    # Обработка с экспортом
-    for polygon_data in clipper.clip_all_polygons(polygons_gdf):
-        logger.info(f"Обработан полигон {polygon_data.fid} ({polygon_data.biome_name})")
+        # Обработка с экспортом
+        for polygon_data in clipper.clip_all_polygons(polygons_gdf):
+            logger.info(f"Обработан полигон {polygon_data.fid} ({polygon_data.biome_name})")
 
-        # Передача данных в следующий этап
-        # process_pansharpening(polygon_data.ms_data, polygon_data.pan_data)
+    except Exception as e:
+        logger.error(f'Критическая ошибка в исполнении: {e}')
 
 
 if __name__ == "__main__":

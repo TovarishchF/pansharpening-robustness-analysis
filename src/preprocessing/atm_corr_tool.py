@@ -6,8 +6,12 @@ import logging
 from typing import Dict, Optional, Tuple
 from dataclasses import dataclass
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Импорт кастомного логгера
+from src.utils.logger import get_logger, setup_logging
+
+# Инициализация логгера
+setup_logging()
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -39,7 +43,7 @@ class AtmosphericCorrection:
 
     def _setup_paths(self):
         """Настройка путей для экспорта"""
-        self.export_path = self.root_dir / self.config['intermediate_path'] / "corrected_data"
+        self.export_path = self.root_dir / self.config['data']['intermediate'] / "corrected_data"
         self.export_path.mkdir(parents=True, exist_ok=True)
         logger.info(f"Путь для экспорта: {self.export_path}")
 
@@ -275,19 +279,21 @@ def main():
     logger.info("Запуск атмосферной коррекции")
     corrector = AtmosphericCorrection()
 
-    # Найти единственную сцену
-    scene_path = corrector.find_raw_scene()
-    if not scene_path:
-        logger.error("Сцена не найдена")
-        return
+    try:
+        # Найти единственную сцену
+        scene_path = corrector.find_raw_scene()
+        if not scene_path:
+            logger.error("Сцена не найдена")
+            return
 
-    # Обработать сцену
-    corrected_data = corrector.process_scene(scene_path)
-    if corrected_data:
-        logger.info(f"Успешно обработана сцена: {corrected_data.scene_name}")
-    else:
-        logger.error("Не удалось обработать сцену")
-
+        # Обработать сцену
+        corrected_data = corrector.process_scene(scene_path)
+        if corrected_data:
+            logger.info(f"Успешно обработана сцена: {corrected_data.scene_name}")
+        else:
+            logger.error("Не удалось обработать сцену")
+    except Exception as e:
+        logger.error(f'Критическая ошибка в исполнении: {e}')
 
 if __name__ == "__main__":
     main()

@@ -1,10 +1,9 @@
 data:
   raw: "data/raw"
   processed: "data/processed"
-  clip_polygons: "data/polygons/biome_polygons.gpkg"
-  class_polygons: "data/polygons/classification_polygons.gpkg"
-
-intermediate_path: "data/intermediate"
+  intermediate: "data/intermediate"
+  clip_polygons: "data/polygons/biome_polygons.gpkg"              # .gpkg БЕЗ ERSI LULC
+  class_polygons: "data/polygons/classification_polygons.gpkg"    # .gpkg с обучающими ERSI LULC
 
 biomes:
   urban: "Урбанизированные территории"
@@ -15,3 +14,16 @@ landsat:
   ms_bands: [2, 3, 4, 5, 6, 7]  # B2-B7
   pan_band: 8                   # B8
 
+logging:
+  level: "INFO"
+  console_level: "INFO"
+  file_level: "DEBUG"
+  rotation:
+    max_size_mb: 10      # 10 МБ максимальный размер файла
+    backup_count: 5      # Хранить 5 старых файлов
+    when: "D"            # Ротация по дням (D - день, H - час)
+    interval: 1          # Каждый день
+  formats:
+    detailed: "%(timestamp)s - %(name)-40s - %(levelname)-8s - %(message)s"
+    simple: "%(levelname)-8s %(message)s"
+    metric: "METRIC %(name)s %(message)s"
