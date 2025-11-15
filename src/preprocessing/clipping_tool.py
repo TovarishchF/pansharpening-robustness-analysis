@@ -23,7 +23,8 @@ class ClippedPolygon:
     fid: int  # Используем fid вместо poly_id
     ms_data: np.ndarray  # 6-канальный MS
     pan_data: np.ndarray  # 1-канальный PAN
-    transform: any
+    ms_transform: any
+    pan_transform: any
     crs: str
 
 
@@ -112,7 +113,7 @@ class ClippingTool:
         try:
             # Обрезка многоканального MS
             with rasterio.vrt.WarpedVRT(ms_src, crs=crs) as vrt:
-                ms_data, transform = mask(vrt, [poly_geom], crop=True, filled=False)
+                ms_data, ms_transform = mask(vrt, [poly_geom], crop=True, filled=False)
                 if ms_data.size == 0:
                     logger.warning(f"Пустой полигон {fid}")
                     return None
@@ -128,7 +129,8 @@ class ClippingTool:
                 fid=fid,  # Используем fid вместо poly_id
                 ms_data=ms_data,  # 6-канальный MS
                 pan_data=pan_data[0],  # 1-канальный PAN
-                transform=transform,
+                ms_transform=ms_transform,
+                pan_transform=pan_transform,
                 crs=crs
             )
 
@@ -147,7 +149,7 @@ class ClippingTool:
         base_profile = {
             'driver': 'GTiff',
             'crs': polygon_data.crs,
-            'transform': polygon_data.transform,
+            'transform': polygon_data.ms_transform,
             'dtype': 'float32',
             'compress': 'DEFLATE'
         }
@@ -173,6 +175,7 @@ class ClippingTool:
         # Экспорт PAN
         pan_profile = base_profile.copy()
         pan_profile.update({
+            'transform': polygon_data.pan_transform,
             'height': polygon_data.pan_data.shape[0],
             'width': polygon_data.pan_data.shape[1],
             'count': 1
@@ -214,12 +217,13 @@ class ClippingTool:
             ms_path = biome_path / f"{fid:02d}_MS.tif"  # Используем fid
             with rasterio.open(ms_path) as src:
                 ms_data = src.read()
-                transform = src.transform
+                ms_transform = src.transform
                 crs = src.crs
 
             # Загрузка PAN
             pan_path = biome_path / f"{fid:02d}_PAN.tif"  # Используем fid
             with rasterio.open(pan_path) as src:
+                pan_transform = src.transform
                 pan_data = src.read(1)
 
             return ClippedPolygon(
@@ -227,7 +231,8 @@ class ClippingTool:
                 fid=fid,  # Используем fid
                 ms_data=ms_data,
                 pan_data=pan_data,
-                transform=transform,
+                ms_transform=ms_transform,
+                pan_transform=pan_transform,
                 crs=crs
             )
 
