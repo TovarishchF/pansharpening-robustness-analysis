@@ -193,7 +193,7 @@ class BroveyHistogramPansharpening:
         """
         Обработка одного полигона методом Brovey Transform с Histogram Matching
         """
-        # logger.info(f"Обработка полигона {fid} биома {biome_name} методом BT-H")
+        # logger.info(f"Обработка полигона {fid} биома {biome_name} методом {self.method_name}")
 
         try:
             # Загрузка MS данных (6 каналов, 30м)
@@ -245,7 +245,7 @@ class BroveyHistogramPansharpening:
                 profile=output_profile
             )
 
-            logger.info(f"Успешно обработан полигон {fid} методом BT-H")
+            # logger.info(f"Успешно обработан полигон {fid} методом {self.method_name}")
             return result
 
         except Exception as e:
@@ -280,7 +280,7 @@ class BroveyHistogramPansharpening:
         """
         Обработка всех биомов и полигонов
         """
-        logger.info("Начало обработки всех биомов методом Brovey Transform с Histogram Matching")
+        logger.info(f"Начало обработки всех биомов методом {self.method_name}")
 
         # Находим все файлы полигонов
         polygon_files = self._find_polygon_files()
@@ -303,12 +303,12 @@ class BroveyHistogramPansharpening:
                 if result:
                     self._export_pansharpened(result)
                     total_processed += 1
-                    # logger.info(f"Успешно паншарплен полигон {poly_info['fid']} биома {biome_name} методом BT-H")
+                    # logger.info(f"Успешно паншарплен полигон {poly_info['fid']} биома {biome_name} методом {self.method_name}")
                 else:
                     total_errors += 1
-                    logger.error(f"Ошибка паншарпенинга полигона {poly_info['fid']} биома {biome_name}")
+                    logger.error(f"Ошибка паншарпенинга полигона {poly_info['fid']} биома {biome_name} методом {self.method_name}")
 
-        logger.info(f"Обработка BT-H завершена. Успешно: {total_processed}, Ошибок: {total_errors}")
+        logger.info(f"Обработка {self.method_name} завершена. Успешно: {total_processed}, Ошибок: {total_errors}")
 
 
 def main():

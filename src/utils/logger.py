@@ -32,10 +32,17 @@ class ResearchLogger:
     Логгер для полного пайплайна с ротацией файлов
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: Optional[str] = None, log_subdir: Optional[str] = None):
         self.root_dir = Path(__file__).resolve().parent.parent.parent
         self.config = self._load_config(config_path)
-        self.log_dir = self.root_dir / "logs"
+
+        # CHANGED: создаем подпапку с датой или используем переданную
+        if log_subdir:
+            self.log_dir = self.root_dir / "logs" / log_subdir
+        else:
+            date_str = datetime.now().strftime('%Y-%m-%d')
+            self.log_dir = self.root_dir / "logs" / date_str
+
         self._setup_logging()
 
     def _load_config(self, config_path: Optional[str]) -> Dict[str, Any]:
@@ -47,6 +54,8 @@ class ResearchLogger:
             'rotation': {
                 'max_size_mb': 10,
                 'backup_count': 5,
+                'when': 'D',
+                'interval': 1,
             },
             'formats': {
                 'detailed': '%(timestamp)s - %(name)-35s - %(levelname)-8s - %(message)s',
@@ -76,6 +85,7 @@ class ResearchLogger:
 
     def _setup_logging(self):
         """Настраивает всю систему логирования"""
+        # CHANGED: создаем директорию с датой
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
         main_logger = logging.getLogger('research')
@@ -97,7 +107,8 @@ class ResearchLogger:
         console_handler.setLevel(getattr(logging, self.config['console_level']))
 
         console_formatter = logging.Formatter(
-            '%(levelname)-8s [%(name)s] %(message)s'
+            '%(asctime)s - %(levelname)-8s [%(name)s] %(message)s',
+            datefmt='%H:%M:%S'
         )
         console_handler.setFormatter(console_formatter)
         logger.addHandler(console_handler)
@@ -117,17 +128,18 @@ class ResearchLogger:
 
     def _setup_main_file_handler(self, logger: logging.Logger, rotation_config: Dict):
         """Основной файл с детальной информацией"""
+        # CHANGED: файл создается в подпапке с датой
         main_log_path = self.log_dir / "pipeline.log"
 
-        file_handler = logging.handlers.RotatingFileHandler(
+        file_handler = logging.handlers.TimedRotatingFileHandler(
             filename=main_log_path,
-            maxBytes=rotation_config['max_size_mb'] * 1024 * 1024,
+            when=rotation_config['when'],
+            interval=rotation_config['interval'],
             backupCount=rotation_config['backup_count'],
             encoding='utf-8'
         )
         file_handler.setLevel(getattr(logging, self.config['file_level']))
 
-        # Используем кастомный форматтер с timestamp
         file_formatter = CustomFormatter(
             self.config['formats']['detailed']
         )
@@ -137,18 +149,19 @@ class ResearchLogger:
 
     def _setup_metrics_file_handler(self, logger: logging.Logger, rotation_config: Dict):
         """Файл для метрик в JSON формате"""
+        # CHANGED: файл создается в подпапке с датой
         metrics_log_path = self.log_dir / "metrics.log"
 
-        metrics_handler = logging.handlers.RotatingFileHandler(
+        metrics_handler = logging.handlers.TimedRotatingFileHandler(
             filename=metrics_log_path,
-            maxBytes=rotation_config['max_size_mb'] * 1024 * 1024,
+            when=rotation_config['when'],
+            interval=rotation_config['interval'],
             backupCount=rotation_config['backup_count'],
             encoding='utf-8'
         )
         metrics_handler.setLevel(logging.INFO)
         metrics_handler.addFilter(MetricsFilter())
 
-        # Простой формат для метрик - только чистое JSON сообщение
         metrics_formatter = logging.Formatter('%(message)s')
         metrics_handler.setFormatter(metrics_formatter)
 
@@ -156,11 +169,13 @@ class ResearchLogger:
 
     def _setup_error_file_handler(self, logger: logging.Logger, rotation_config: Dict):
         """Файл только для ошибок и предупреждений"""
+        # CHANGED: файл создается в подпапке с датой
         error_log_path = self.log_dir / "errors.log"
 
-        error_handler = logging.handlers.RotatingFileHandler(
+        error_handler = logging.handlers.TimedRotatingFileHandler(
             filename=error_log_path,
-            maxBytes=rotation_config['max_size_mb'] * 1024 * 1024,
+            when=rotation_config['when'],
+            interval=rotation_config['interval'],
             backupCount=rotation_config['backup_count'],
             encoding='utf-8'
         )
@@ -209,14 +224,16 @@ class ResearchLogger:
 _research_logger = None
 
 
-def setup_logging(config_path: Optional[str] = None) -> ResearchLogger:
+def setup_logging(config_path: Optional[str] = None, log_subdir: Optional[str] = None) -> ResearchLogger:
+    """Инициализирует систему логирования с возможностью указать подпапку"""
     global _research_logger
     if _research_logger is None:
-        _research_logger = ResearchLogger(config_path)
+        _research_logger = ResearchLogger(config_path, log_subdir)
     return _research_logger
 
 
 def get_logger(name: str) -> logging.Logger:
+    """Возвращает именованный логгер"""
     global _research_logger
     if _research_logger is None:
         _research_logger = ResearchLogger()
@@ -225,7 +242,20 @@ def get_logger(name: str) -> logging.Logger:
 
 def log_metric(logger: logging.Logger, metric_name: str, value: float,
                context: Optional[Dict] = None):
+    """Логирует метрику"""
     global _research_logger
     if _research_logger is None:
         _research_logger = ResearchLogger()
     _research_logger.log_metric(logger, metric_name, value, context)
+
+
+# CHANGED: добавлена функция для создания логгера с конкретной датой
+def setup_logging_for_date(target_date: str, config_path: Optional[str] = None) -> ResearchLogger:
+    """
+    Создает логгер для указанной даты
+
+    Args:
+        target_date: Дата в формате 'YYYY-MM-DD'
+        config_path: Путь к конфигурационному файлу
+    """
+    return setup_logging(config_path, target_date)

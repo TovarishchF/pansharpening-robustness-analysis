@@ -202,7 +202,7 @@ class BroveyPansharpening:
                 profile=output_profile
             )
 
-            logger.info(f"Успешно обработан полигон {fid}")
+            # logger.info(f"Успешно обработан полигон {fid}")
             return result
 
         except Exception as e:
@@ -237,7 +237,7 @@ class BroveyPansharpening:
         """
         Обработка всех биомов и полигонов
         """
-        logger.info("Начало обработки всех биомов методом Brovey Transform")
+        logger.info(f"Начало обработки всех биомов методом {self.method_name}")
 
         # Находим все файлы полигонов
         polygon_files = self._find_polygon_files()

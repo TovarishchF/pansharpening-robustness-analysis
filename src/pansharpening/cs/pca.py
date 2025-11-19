@@ -38,7 +38,7 @@ class PCAPansharpening:
         self.config = self._load_config(config_path)
         self.method_name = "pca"
         self._setup_paths()
-        logger.info(f"Инициализирован метод PCA паншарпенинга")
+        logger.info(f"Инициализирован метод {self.method_name} паншарпенинга")
 
     def _load_config(self, config_path: str) -> dict:
         with open(config_path, 'r') as f:
@@ -231,7 +231,7 @@ class PCAPansharpening:
                 profile=output_profile
             )
 
-            logger.info(f"Успешно обработан полигон {fid} методом PCA")
+            # logger.info(f"Успешно обработан полигон {fid} методом PCA")
             return result
 
         except Exception as e:
@@ -289,12 +289,12 @@ class PCAPansharpening:
                 if result:
                     self._export_pansharpened(result)
                     total_processed += 1
-                    # logger.info(f"Успешно паншарплен полигон {poly_info['fid']} биома {biome_name} методом PCA")
+                    # logger.info(f"Успешно паншарплен полигон {poly_info['fid']} биома {biome_name} методом {self.method_name}")
                 else:
                     total_errors += 1
-                    logger.error(f"Ошибка паншарпенинга полигона {poly_info['fid']} биома {biome_name}")
+                    logger.error(f"Ошибка паншарпенинга полигона {poly_info['fid']} биома {biome_name} методом {self.method_name}")
 
-        logger.info(f"Обработка PCA завершена. Успешно: {total_processed}, Ошибок: {total_errors}")
+        logger.info(f"Обработка {self.method_name} завершена. Успешно: {total_processed}, Ошибок: {total_errors}")
 
 
 def main():
