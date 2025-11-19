@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 class ClippedPolygon:
     """Обрезанные данные полигона"""
     biome_name: str
-    fid: int  # Используем fid вместо poly_id
+    poly_id: int  # Используем poly_id
     ms_data: np.ndarray  # 6-канальный MS
     pan_data: np.ndarray  # 1-канальный PAN
     ms_transform: any
@@ -31,7 +31,7 @@ class ClippedPolygon:
 class ClippingTool:
     """
     Инструмент обрезки с экспортом многоканальных файлов
-    {fid:02d}_MS.tif и {fid:02d}_PAN.tif в папках биомов
+    {poly_id:02d}_MS.tif и {poly_id:02d}_PAN.tif в папках биомов
     """
 
     def __init__(self, config_path: str = None):
@@ -57,20 +57,21 @@ class ClippingTool:
 
     def load_polygons(self) -> gpd.GeoDataFrame:
         """Загрузка полигонов с информацией о биомами"""
-        polygons_path = self.root_dir / "data/polygons/biome_polygons.gpkg"
+        polygons_path = self.root_dir / self.config['data']['clip_polygons']
         if not polygons_path.exists():
             raise FileNotFoundError(f"Файл полигонов не найден: {polygons_path}")
 
-        gdf = gpd.read_file(polygons_path)
+        gdf = gpd.read_file(polygons_path, layer='1_urban')
 
         # Проверяем необходимые колонки
         if 'biome_name' not in gdf.columns:
             raise ValueError("Отсутствует колонка 'biome_name' в полигонах")
 
-        # Если нет колонки 'fid', используем индекс как fid
-        if 'fid' not in gdf.columns:
-            logger.info("Колонка 'fid' не найдена, используем индекс как fid")
-            gdf = gdf.reset_index().rename(columns={'index': 'fid'})
+        # Если нет колонки 'poly_id', используем индекс как poly_id
+        if 'poly_id' not in gdf.columns:
+            print(gdf['poly_id'])
+            logger.info("Колонка 'poly_id' не найдена, используем индекс как poly_id")
+            gdf['poly_id'] = gdf.index
 
         # Валидация биомов
         invalid_biomes = set(gdf['biome_name']) - set(self.config['biomes'].keys())
@@ -105,7 +106,7 @@ class ClippingTool:
         poly_row = polygons_gdf.iloc[idx]
         poly_geom = poly_row.geometry
         biome_name = poly_row['biome_name']
-        fid = poly_row['fid']
+        poly_id = poly_row['poly_id']
 
         # Получаем CRS из GeoDataFrame, а не из геометрии
         crs = polygons_gdf.crs
@@ -115,7 +116,7 @@ class ClippingTool:
             with rasterio.vrt.WarpedVRT(ms_src, crs=crs) as vrt:
                 ms_data, ms_transform = mask(vrt, [poly_geom], crop=True, filled=False)
                 if ms_data.size == 0:
-                    logger.warning(f"Пустой полигон {fid}")
+                    logger.warning(f"Пустой полигон {poly_id}")
                     return None
 
             # Обрезка PAN
@@ -126,7 +127,7 @@ class ClippingTool:
 
             return ClippedPolygon(
                 biome_name=biome_name,
-                fid=fid,  # Используем fid вместо poly_id
+                poly_id=poly_id,
                 ms_data=ms_data,  # 6-канальный MS
                 pan_data=pan_data[0],  # 1-канальный PAN
                 ms_transform=ms_transform,
@@ -135,13 +136,13 @@ class ClippingTool:
             )
 
         except Exception as e:
-            logger.error(f"Ошибка обрезки полигона {fid}: {e}")
+            logger.error(f"Ошибка обрезки полигона {poly_id}: {e}")
             return None
 
     def _export_polygon_files(self, polygon_data: ClippedPolygon):
         """
         Экспорт полигона в многоканальные файлы
-        {fid:02d}_MS.tif и {fid:02d}_PAN.tif
+        {poly_id:02d}_MS.tif и {poly_id:02d}_PAN.tif
         """
         biome_path = self.export_path / polygon_data.biome_name
 
@@ -162,7 +163,7 @@ class ClippingTool:
             'count': polygon_data.ms_data.shape[0]  # 6 каналов
         })
 
-        ms_filename = f"{polygon_data.fid:02d}_MS.tif"  # Используем fid
+        ms_filename = f"{polygon_data.poly_id:02d}_MS.tif"  # Используем poly_id
         ms_path = biome_path / ms_filename
 
         with rasterio.open(ms_path, 'w', **ms_profile) as dst:
@@ -181,7 +182,7 @@ class ClippingTool:
             'count': 1
         })
 
-        pan_filename = f"{polygon_data.fid:02d}_PAN.tif"  # Используем fid
+        pan_filename = f"{polygon_data.poly_id:02d}_PAN.tif"  # Используем poly_id
         pan_path = biome_path / pan_filename
 
         with rasterio.open(pan_path, 'w', **pan_profile) as dst:
@@ -206,7 +207,7 @@ class ClippingTool:
 
                     yield polygon_data
 
-    def load_polygon_from_files(self, biome_name: str, fid: int) -> Optional[ClippedPolygon]:
+    def load_polygon_from_files(self, biome_name: str, poly_id: int) -> Optional[ClippedPolygon]:
         """
         Загрузка полигона из экспортированных файлов
         """
@@ -214,21 +215,21 @@ class ClippingTool:
 
         try:
             # Загрузка многоканального MS
-            ms_path = biome_path / f"{fid:02d}_MS.tif"  # Используем fid
+            ms_path = biome_path / f"{poly_id:02d}_MS.tif"  # Используем poly_id
             with rasterio.open(ms_path) as src:
                 ms_data = src.read()
                 ms_transform = src.transform
                 crs = src.crs
 
             # Загрузка PAN
-            pan_path = biome_path / f"{fid:02d}_PAN.tif"  # Используем fid
+            pan_path = biome_path / f"{poly_id:02d}_PAN.tif"  # Используем poly_id
             with rasterio.open(pan_path) as src:
                 pan_transform = src.transform
                 pan_data = src.read(1)
 
             return ClippedPolygon(
                 biome_name=biome_name,
-                fid=fid,  # Используем fid
+                poly_id=poly_id,  # Используем poly_id
                 ms_data=ms_data,
                 pan_data=pan_data,
                 ms_transform=ms_transform,
@@ -237,7 +238,7 @@ class ClippingTool:
             )
 
         except Exception as e:
-            logger.error(f"Ошибка загрузки полигона {fid}: {e}")
+            logger.error(f"Ошибка загрузки полигона {poly_id}: {e}")
             return None
 
 
@@ -251,7 +252,7 @@ def main():
 
         # Обработка с экспортом
         for polygon_data in clipper.clip_all_polygons(polygons_gdf):
-            logger.info(f"Обработан полигон {polygon_data.fid} ({polygon_data.biome_name})")
+            logger.info(f"Обработан полигон {polygon_data.poly_id} ({polygon_data.biome_name})")
 
     except Exception as e:
         logger.error(f'Критическая ошибка в исполнении: {e}')
