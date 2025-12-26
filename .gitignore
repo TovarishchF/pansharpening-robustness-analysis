@@ -209,6 +209,9 @@ __marimo__/
 # Data
 /data/raw/
 /data/intermediate/
+/data/processed/
+/data/results/
 
 # Logs
 logs/
+results/pansharpening_metrics_complete.json

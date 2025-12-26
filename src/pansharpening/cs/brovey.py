@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+# Добавляем корневую директорию проекта в sys.path
+root_dir = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(root_dir))
+
 import yaml
 import rasterio
 import numpy as np

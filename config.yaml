@@ -1,29 +1,113 @@
 data:
+  # Пути растровых и промежуточных данных
   raw: "data/raw"
   processed: "data/processed"
   intermediate: "data/intermediate"
-  clip_polygons: "data/polygons/biome_polygons.gpkg"              # .gpkg БЕЗ ERSI LULC
-  class_polygons: "data/polygons/classification_polygons.gpkg"    # .gpkg с обучающими ERSI LULC
+  # Пути векторных данных
+  clip_polygons: "data/polygons/biome_polygons.gpkg"              # .gpkg без обучающих классов
+  class_polygons: "data/polygons/classification_polygons.gpkg"    # .gpkg с обучающими классами
+
 
 biomes:
   urban: "Урбанизированные территории"
   forest: "Лесные массивы"
   agriculture: "Сельскохозяйственные угодья"
 
+
 landsat:
   ms_bands: [2, 3, 4, 5, 6, 7]  # B2-B7
   pan_band: 8                   # B8
+
 
 logging:
   level: "INFO"
   console_level: "INFO"
   file_level: "DEBUG"
+  # Настройки ротации файлов
   rotation:
     max_size_mb: 10      # 10 МБ максимальный размер файла
     backup_count: 5      # Хранить 5 старых файлов
     when: "D"            # Ротация по дням (D - день, H - час)
     interval: 1          # Каждый день
+  # Параметры форматирования
   formats:
     detailed: "%(timestamp)s - %(name)-40s - %(levelname)-8s - %(message)s"
     simple: "%(levelname)-8s %(message)s"
     metric: "METRIC %(name)s %(message)s"
+
+# Общие настройки проекта
+project:
+  random_state: 42
+
+# Параметры разделения
+cross_validation:
+  n_folds: 3
+  test_size: 0.3
+  output_file: "cv_split.json"
+
+# Параметры классификации
+classification:
+  maximum_likelihood:
+    covariance_type: "full"
+    max_iter: 100
+    n_init: 3
+    tol: 0.001
+    init_params: "kmeans"
+  random_forest:
+    n_estimators: 100
+    max_depth: null
+    min_samples_split: 2
+    min_samples_leaf: 1
+    max_features: "sqrt"
+    n_jobs: -1
+  xgboost:
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0
+    reg_lambda: 1
+
+class_metrics:
+  # Метрики для вычисления
+  metrics_to_calculate: ["F1", "IOU", "UA", "PA", "Kappa"]
+  # Стратегия усреднения для многоклассовой классификации
+  average_strategy: "macro"  # macro, micro, weighted
+  # Порог для бинаризации в случае бинарной классификации
+  binary_threshold: 0.5
+  # Сохранять ли детальную информацию по классам
+  save_detailed_metrics: true
+
+
+pansharpening_metrics:
+  # Метрики для вычисления
+  metrics_to_calculate: ["GS", "SC", "Entropy", "QNR"]
+  # Весовые коэффициенты для интегрального рейтинга по биомам
+  weights:
+    urban:
+      GS: 0.30
+      SC: 0.25
+      Entropy: 0.20
+      QNR: 0.25
+    forest:
+      GS: 0.20
+      SC: 0.25
+      Entropy: 0.30
+      QNR: 0.25
+    agriculture:
+      GS: 0.25
+      SC: 0.30
+      Entropy: 0.20
+      QNR: 0.25
+  # Параметры для QNR
+  qnr_params:
+    p: 1
+    q: 1
+    alpha: 1
+    beta: 1
+  # Параметры для вычисления градиентов
+  gradient_params:
+    ksize: 3  # Размер ядра для оператора Собеля
+    delta: 0  # Приращение для производных
+    scale: 1  # Масштаб для производных
