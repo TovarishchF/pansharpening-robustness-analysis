@@ -135,6 +135,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+.idea/
+.vscode/
 .env
 .envrc
 .venv
@@ -210,8 +212,7 @@ __marimo__/
 /data/raw/
 /data/intermediate/
 /data/processed/
-/data/results/
+results/
 
 # Logs
 logs/
-results/pansharpening_metrics_complete.json
