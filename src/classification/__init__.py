@@ -16,6 +16,14 @@ class ClassificationResult:
     crs: Any
     profile: Dict[str, Any]
 
+# Train/Test split 
+from src.classification.tt_split import (
+    TTSplitter,
+    TrainTestSplit,
+)
+
+# Метрики классификации
+from src.classification.metrics import MetricsCalculator
 
 # Импорт всех методов классификации
 from src.classification.maxlike import MaximumLikelihoodClassifier
@@ -78,11 +86,18 @@ __all__ = [
     "ClassificationMethodFactory",
     "classification_factory",
 
+    # Разделитель наборот TT
+    "TTSplitter",
+
     # Структура данных
     "ClassificationResult",
+    "TrainTestSplit",
 
     # Методы классификации
     "MaximumLikelihoodClassifier",
     "RandomForestImageClassifier",
     "XGBoostImageClassifier",
+
+    #Метрики
+    "MetricsCalculator",
 ]

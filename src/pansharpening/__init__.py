@@ -18,6 +18,8 @@ from src.pansharpening.cs import BroveyPansharpening, BroveyHistogramPansharpeni
 from src.pansharpening.mra import HPFPansharpening, ATWTPansharpening, SFIMPansharpening
 from src.pansharpening.model_based import GramSchmidtPansharpening, GramSchmidtAdaptivePansharpening, PRACSPansharpening
 
+# импорт калькулятора метрик
+from src.pansharpening.metrics import PansharpeningMetricsCalculator
 
 class PansharpeningMethodFactory:
     """
@@ -104,4 +106,7 @@ __all__ = [
     'GramSchmidtPansharpening',
     'GramSchmidtAdaptivePansharpening',
     'PRACSPansharpening',
+
+    # Метрики
+    'PansharpeningMetricsCalculator',
 ]
