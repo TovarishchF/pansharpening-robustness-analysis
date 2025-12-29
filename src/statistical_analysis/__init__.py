@@ -13,15 +13,15 @@ from .decsript import (
 )
 
 from .ranking import (
-    RankingAnalyzer
+    PansharpeningRankingAnalyzer
 )
 
 from .agreement import (
-    AgreementAnalyzer
+    KendallAgreementAnalyzer
 )
 
 from .boots import (
-    BootstrapAnalyzer
+    BootstrapRankingAnalyzer
 )
 
 __all__ = [
@@ -29,11 +29,11 @@ __all__ = [
     "DescriptiveStatisticsAnalyzer",
 
     # consensus ranking
-    "RankingAnalyzer",
+    "PansharpeningRankingAnalyzer",
 
     # agreement analysis
-    "AgreementAnalyzer",
+    "KendallAgreementAnalyzer",
 
     # bootstrap stability
-    "BootstrapAnalyzer"
+    "BootstrapRankingAnalyzer"
 ]

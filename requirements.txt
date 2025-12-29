@@ -1,0 +1,11 @@
+geopandas==1.1.1
+matplotlib==3.10.8
+numpy==2.4.0
+opencv-python==4.12.0.88
+pandas==2.3.3
+PyYAML==6.0.3
+rasterio==1.4.4
+scikit-learn==1.8.0
+scipy==1.16.3
+seaborn==0.13.2
+skikit-image==0.26.0 

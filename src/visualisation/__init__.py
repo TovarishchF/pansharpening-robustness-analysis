@@ -10,7 +10,6 @@
 
 from .vis_descriptive import (
     plot_boxplots,
-    plot_violin
 )
 
 from .vis_ranking import (
@@ -24,7 +23,7 @@ from .vis_agreement import (
 
 from .vis_bootstrap import (
     plot_bootstrap_ci,
-    plot_topk_probability
+    plot_topk_probability_by_biome
 )
 
 __all__ = [
@@ -41,5 +40,5 @@ __all__ = [
 
     # bootstrap
     "plot_bootstrap_ci",
-    "plot_topk_probability"
+    "plot_topk_probability_by_biome"
 ]

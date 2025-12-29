@@ -1,23 +1,73 @@
 """
-Пакет исследовательского пайплайна паншарпенинга
+Пакет исследовательского пайплайна паншарпенинга.
 
-Основные модули:
-- utils: Система логирования и утилиты
-- preprocessing: Предобработка данных (атмосферная коррекция, обрезка)
+Этапы пайплайна:
+- preprocessing     : предобработка данных
+- pansharpening     : методы паншарпенинга
+- classification    : пиксельная классификация
+- stat_analysis     : статистический анализ
+- visualisation     : визуализация результатов
 """
 
-from .utils import setup_logging, get_logger, log_metric
-from .preprocessing import AtmosphericCorrection, CorrectedData, ClippingTool, ClippedPolygon
+# Утилиты
+from .utils import (
+    setup_logging,
+    get_logger,
+)
 
+# Предобработка
+from .preprocessing import (
+    AtmosphericCorrection,
+    ClippingTool,
+)
+
+# Паншарпеннинг&Классификация <- Фабрики
+from .pansharpening import pansharpening_factory
+from .classification import classification_factory
+
+# Статистический анализ
+from .statistical_analysis import (
+    DescriptiveStatisticsAnalyzer,
+    PansharpeningRankingAnalyzer,
+    KendallAgreementAnalyzer,
+    BootstrapRankingAnalyzer,
+)
+
+# Визуализация
+from .visualisation import (
+    plot_boxplots,
+    plot_rank_heatmap,
+    plot_borda_scores,
+    plot_kendall_w,
+    plot_bootstrap_ci,
+    plot_topk_probability_by_biome,
+)
+
+# Публичный API 
 __all__ = [
-    # Утилиты
-    'setup_logging',
-    'get_logger',
-    'log_metric',
+    # утилиты
+    "setup_logging",
+    "get_logger",
 
-    # Предобработка
-    'AtmosphericCorrection',
-    'CorrectedData',
-    'ClippingTool',
-    'ClippedPolygon'
+    # предобработка
+    "AtmosphericCorrection",
+    "ClippingTool",
+
+    # фабрики
+    "pansharpening_factory",
+    "classification_factory",
+
+    # стат анализ
+    "DescriptiveStatisticsAnalyzer",
+    "PansharpeningRankingAnalyzer",
+    "KendallAgreementAnalyzer",
+    "BootstrapRankingAnalyzer",
+
+    # визуализация
+    "plot_boxplots",
+    "plot_rank_heatmap",
+    "plot_borda_scores",
+    "plot_kendall_w",
+    "plot_bootstrap_ci",
+    "plot_topk_probability_by_biome",
 ]
