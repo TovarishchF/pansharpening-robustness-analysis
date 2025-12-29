@@ -10,7 +10,7 @@ import json
 import numpy as np
 import rasterio
 import geopandas as gpd
-from collections import defaultdict
+from collections import Counter
 from sklearn.metrics import (
     f1_score,
     jaccard_score,
@@ -28,6 +28,7 @@ class MetricsCalculator:
     """
     Калькулятор метрик классификации.
     Метрики БЕРУТСЯ ТОЛЬКО из config.yaml.
+    Анализ ориентирован на сравнение методов, а не на завышение метрик.
     """
 
     def __init__(self, config_path: str | None = None):
@@ -51,11 +52,12 @@ class MetricsCalculator:
             / self.config["data"]["class_polygons"]
         )
 
-        self.results_dir = (
-            root_dir
-            / "results"
-        )
+        self.results_dir = root_dir / "results"
         self.results_dir.mkdir(parents=True, exist_ok=True)
+
+        # ЖЕСТКО: только macro 
+        # ps только бог поможет далее
+        self.average = "macro"
 
     # ------------------------------------------------------------------ #
 
@@ -64,7 +66,7 @@ class MetricsCalculator:
         extra = set(self.metrics_to_calculate) - allowed
         if extra:
             raise ValueError(
-                f"В конфиге указаны неподдерживаемые метрики: {extra}. "
+                f"Неподдерживаемые метрики: {extra}. "
                 f"Разрешены ТОЛЬКО {allowed}"
             )
 
@@ -76,8 +78,7 @@ class MetricsCalculator:
             layer="classification_polygons"
         )
         gdf["class"] = gdf["class"].astype(int)
-        gdf = gdf[gdf["poly_id"] == poly_id]
-        return gdf
+        return gdf[gdf["poly_id"] == poly_id]
 
     # ------------------------------------------------------------------ #
 
@@ -89,7 +90,7 @@ class MetricsCalculator:
             out_shape=shape,
             transform=transform,
             fill=0,
-            all_touched=True,
+            all_touched=False,  # ВАЖНО
             dtype=np.int32
         )
 
@@ -100,34 +101,48 @@ class MetricsCalculator:
         y_true = y_true[mask]
         y_pred = y_pred[mask]
 
-        results = {}
+        labels = np.unique(y_true)
 
-        average = self.config["class_metrics"].get("average", "macro")
+        results = {}
 
         if "F1" in self.metrics_to_calculate:
             results["F1"] = float(
-                f1_score(y_true, y_pred, average=average, zero_division=0)
+                f1_score(
+                    y_true,
+                    y_pred,
+                    labels=labels,
+                    average=self.average,
+                    zero_division=0
+                )
             )
 
         if "IOU" in self.metrics_to_calculate:
             results["IOU"] = float(
-                jaccard_score(y_true, y_pred, average=average, zero_division=0)
+                jaccard_score(
+                    y_true,
+                    y_pred,
+                    labels=labels,
+                    average=self.average,
+                    zero_division=0
+                )
             )
 
         if "Kappa" in self.metrics_to_calculate:
             results["Kappa"] = float(
-                cohen_kappa_score(y_true, y_pred)
+                cohen_kappa_score(y_true, y_pred, labels=labels)
             )
 
         if "UA" in self.metrics_to_calculate or "PA" in self.metrics_to_calculate:
-            cm = confusion_matrix(y_true, y_pred)
+            cm = confusion_matrix(y_true, y_pred, labels=labels)
+
             with np.errstate(divide="ignore", invalid="ignore"):
                 if "UA" in self.metrics_to_calculate:
-                    ua = np.diag(cm) / cm.sum(axis=0)
-                    results["UA"] = float(np.nanmean(ua))
+                    ua_per_class = np.diag(cm) / cm.sum(axis=0)
+                    results["UA"] = float(np.nanmean(ua_per_class))
+
                 if "PA" in self.metrics_to_calculate:
-                    pa = np.diag(cm) / cm.sum(axis=1)
-                    results["PA"] = float(np.nanmean(pa))
+                    pa_per_class = np.diag(cm) / cm.sum(axis=1)
+                    results["PA"] = float(np.nanmean(pa_per_class))
 
         return results
 
@@ -154,11 +169,10 @@ class MetricsCalculator:
                         with rasterio.open(tif) as src:
                             pred = src.read(1)
                             transform = src.transform
-                            height, width = pred.shape
 
                         gdf = self._load_reference(poly_id)
                         ref = self._rasterize_reference(
-                            gdf, transform, (height, width)
+                            gdf, transform, pred.shape
                         )
 
                         metrics = self._compute_metrics(
@@ -177,8 +191,7 @@ class MetricsCalculator:
                         all_results.append(result)
 
                         logger.info(
-                            f"Метрики посчитаны: "
-                            f"{clf_method.name} | {biome_dir.name} | "
+                            f"Метрики: {clf_method.name} | {biome_dir.name} | "
                             f"{pansharp_dir.name} | poly {poly_id}"
                         )
 
