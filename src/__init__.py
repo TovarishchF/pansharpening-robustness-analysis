@@ -21,9 +21,9 @@ from .preprocessing import (
     ClippingTool,
 )
 
-# Паншарпеннинг&Классификация <- Фабрики
-from .pansharpening import pansharpening_factory
-from .classification import classification_factory
+# Паншарпеннинг&Классификация <- Фабрики, Метрики
+from .pansharpening import pansharpening_factory,  PansharpeningMetricsCalculator
+from .classification import classification_factory, MetricsCalculator
 
 # Статистический анализ
 from .statistical_analysis import (
@@ -56,6 +56,10 @@ __all__ = [
     # фабрики
     "pansharpening_factory",
     "classification_factory",
+
+    # метрики классификации и пш
+    "PansharpeningMetricsCalculator",
+    "MetricsCalculator",
 
     # стат анализ
     "DescriptiveStatisticsAnalyzer",

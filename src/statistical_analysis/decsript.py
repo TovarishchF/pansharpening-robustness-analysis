@@ -34,7 +34,7 @@ class DescriptiveStatisticsAnalyzer:
             self.root_dir / "results" / "classification_metrics.json"
         )
         self.pansharp_metrics_path = (
-            self.root_dir / "results" / "pansharpening_metrics_complete.json"
+            self.root_dir / "results" / "pansharpening_metrics.json"
         )
         self.output_path = (
             self.root_dir / "results" / "stat_analysis" / "decs.json"

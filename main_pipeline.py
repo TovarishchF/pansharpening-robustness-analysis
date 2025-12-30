@@ -23,6 +23,9 @@ from src import (
     pansharpening_factory,
     classification_factory,
 
+    PansharpeningMetricsCalculator,
+    MetricsCalculator,
+
     DescriptiveStatisticsAnalyzer,
     PansharpeningRankingAnalyzer,
     KendallAgreementAnalyzer,
@@ -141,6 +144,9 @@ def main():
         )
 
         method.process_all_biomes()
+    
+    pan_calculator = PansharpeningMetricsCalculator()
+    pan_calculator.run_calculation()
 
     # --------------------------------------------------
     # 3. Классификация
@@ -158,19 +164,26 @@ def main():
 
         classifier.process_all_polygons()
 
+    class_calculator = MetricsCalculator()
+    class_calculator.run()
+
     # --------------------------------------------------
     # 4. Статистический анализ
     # --------------------------------------------------
 
     logger.info("Статистический анализ")
 
-    descriptive_stats = DescriptiveStatisticsAnalyzer().run()
+    desc = DescriptiveStatisticsAnalyzer()
+    desc.run()
 
-    ranking_stats = PansharpeningRankingAnalyzer().run()
+    pansh = PansharpeningRankingAnalyzer()
+    pansh.run()
 
-    agreement_stats = KendallAgreementAnalyzer().run()
+    kendal = KendallAgreementAnalyzer()
+    kendal.run()
 
-    bootstrap_stats = BootstrapRankingAnalyzer().run()
+    boots = BootstrapRankingAnalyzer()
+    boots.run()
 
     # --------------------------------------------------
     # 5. Визуализация
