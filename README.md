@@ -136,7 +136,7 @@ pansharpening-robustness-analysis/\
 │ ├── classification/        # Implementations of classification algorithms and metrics & train/test split\
 │ ├── statistical_analysis/  # Descriptive analysis, consensus ranking, bootstrap, agreement analysis (Kendall’s W)\
 │ ├── utils/                 # Helper functions and logging\
-│ ├── visualisation/         # Visualisation for easier analysis\
+│ └── visualisation/         # Visualisation for easier analysis\
 │\
 ├── results/                 # Generated outputs (tables, plots, final ratings)\
 ├── logs/                 # Automatic logs with daily rotation\
