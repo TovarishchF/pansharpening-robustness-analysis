@@ -72,7 +72,13 @@ def plot_rank_heatmap():
     save_figure("heatmap_median_rank.png")
 
 
+
 def plot_borda_scores():
+    """
+    Строит barplot:
+    1) Borda score по биомам
+    2) Median rank по биомам
+    """
     setup_visual_style()
     data = load_json(DATA_PATH)
 
@@ -81,31 +87,48 @@ def plot_borda_scores():
     for clf_name, clf_data in data["classifiers"].items():
         for biome_name, biome_data in clf_data.items():
             for poly_data in biome_data["per_polygon"].values():
-                for method, score in poly_data["borda"].items():
+                for method in poly_data["borda"].keys():
                     rows.append({
                         "classifier": clf_name,
                         "biome": biome_name,
                         "method": method,
-                        "borda": score
+                        "borda": poly_data["borda"][method],
+                        "median_rank": poly_data["median_rank"][method]
                     })
 
     df = pd.DataFrame(rows)
 
+    # ===== Borda score =====
     plt.figure(figsize=(18, 10))
     sns.barplot(
         data=df,
-        x="method",      # ← методы
+        x="method",
         y="borda",
-        hue="biome",     # ← цвет = биом
-        errorbar=None    # ← без CI
+        hue="biome",
+        errorbar=None
     )
     plt.title("Borda score по биомам")
-    plt.ylabel("Значение")
-    plt.xlabel("Методы")
+    plt.ylabel("Borda score")
+    plt.xlabel("Методы ПШ")
     plt.xticks(rotation=90)
     plt.legend(title="Биом")
     save_figure("borda_by_biome.png")
 
+    # ===== Median rank =====
+    plt.figure(figsize=(18, 10))
+    sns.barplot(
+        data=df,
+        x="method",
+        y="median_rank",
+        hue="biome",
+        errorbar=None
+    )
+    plt.title("Median rank по биомам")
+    plt.ylabel("Median rank (меньше — лучше)")
+    plt.xlabel("Методы ПШ")
+    plt.xticks(rotation=90)
+    plt.legend(title="Биом")
+    save_figure("median_rank_by_biome.png")
 
 if __name__ == "__main__":
     plot_rank_heatmap()

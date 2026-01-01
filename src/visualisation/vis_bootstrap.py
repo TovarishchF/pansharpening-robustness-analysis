@@ -20,6 +20,11 @@ DATA_PATH = (
 
 
 def plot_bootstrap_ci():
+    """
+    Строит bootstrap доверительные интервалы:
+    1) по median rank
+    2) по Borda score
+    """
     setup_visual_style()
     data = load_json(DATA_PATH)
 
@@ -30,44 +35,71 @@ def plot_bootstrap_ci():
             for method, stats in biome_data.items():
                 rows.append({
                     "method": method,
-                    "mean": stats["median_rank"]["mean"],
-                    "low": stats["median_rank"]["ci_lower"],
-                    "high": stats["median_rank"]["ci_upper"]
+
+                    "median_mean": stats["median_rank"]["mean"],
+                    "median_low": stats["median_rank"]["ci_lower"],
+                    "median_high": stats["median_rank"]["ci_upper"],
+
+                    "borda_mean": stats["borda"]["mean"],
+                    "borda_low": stats["borda"]["ci_lower"],
+                    "borda_high": stats["borda"]["ci_upper"],
                 })
 
     df = (
         pd.DataFrame(rows)
         .groupby("method", as_index=False)
         .mean()
-        .sort_values("mean")
     )
 
-    plt.figure(figsize=(10, 6))
+    # ===== MEDIAN RANK =====
+    df_median = df.sort_values("median_mean")
 
+    plt.figure(figsize=(10, 6))
     plt.hlines(
-        y=df["method"],
-        xmin=df["low"],
-        xmax=df["high"],
+        y=df_median["method"],
+        xmin=df_median["median_low"],
+        xmax=df_median["median_high"],
         linewidth=3,
         alpha=0.8
     )
-
     plt.plot(
-        df["mean"],
-        df["method"],
+        df_median["median_mean"],
+        df_median["method"],
         "o",
         markersize=7
     )
 
-    plt.xlabel("Медианный ранг")
-    plt.ylabel("Методы")
+    plt.xlabel("Median rank")
+    plt.ylabel("Методы ПШ")
     plt.title("Bootstrap доверительные интервалы (median rank)")
-
-    # plt.gca().invert_yaxis()
-
     plt.grid(axis="x", linestyle="--", alpha=0.5)
 
-    save_figure("bootstrap_ci.png")
+    save_figure("bootstrap_ci_median_rank.png")
+
+    # ===== BORDA SCORE =====
+    df_borda = df.sort_values("borda_mean", ascending=False)
+
+    plt.figure(figsize=(10, 6))
+    plt.hlines(
+        y=df_borda["method"],
+        xmin=df_borda["borda_low"],
+        xmax=df_borda["borda_high"],
+        linewidth=3,
+        alpha=0.8
+    )
+    plt.plot(
+        df_borda["borda_mean"],
+        df_borda["method"],
+        "o",
+        markersize=7
+    )
+
+    plt.xlabel("Borda score")
+    plt.ylabel("Методы ПШ")
+    plt.title("Bootstrap доверительные интервалы (Borda score)")
+    plt.grid(axis="x", linestyle="--", alpha=0.5)
+
+    save_figure("bootstrap_ci_borda.png")
 
 
 def plot_topk_probability_by_biome():
