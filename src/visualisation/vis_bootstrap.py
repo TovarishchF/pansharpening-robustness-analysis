@@ -69,9 +69,9 @@ def plot_bootstrap_ci():
         markersize=7
     )
 
-    plt.xlabel("Median rank")
-    plt.ylabel("Методы ПШ")
-    plt.title("Bootstrap доверительные интервалы (median rank)")
+    plt.xlabel("Медианный ранг")
+    plt.ylabel("Методы паншарпенинга")
+    plt.title("Бутстреп доверительные интервалы (median rank)")
     plt.grid(axis="x", linestyle="--", alpha=0.5)
 
     save_figure("bootstrap_ci_median_rank.png")
@@ -95,8 +95,8 @@ def plot_bootstrap_ci():
     )
 
     plt.xlabel("Borda score")
-    plt.ylabel("Методы ПШ")
-    plt.title("Bootstrap доверительные интервалы (Borda score)")
+    plt.ylabel("Методы паншарпенинга")
+    plt.title("Бутстреп доверительные интервалы (Borda score)")
     plt.grid(axis="x", linestyle="--", alpha=0.5)
 
     save_figure("bootstrap_ci_borda.png")
@@ -131,9 +131,10 @@ def plot_topk_probability_by_biome():
         hue="biome"
     )
     plt.ylabel("Вероятность")
-    plt.title("Вероятность попасть в Топ-3 (bootstrap)")
+    plt.xlabel("Методы паншарпенинга")
+    plt.title("Вероятность попасть в Топ-3")
     plt.xticks(rotation=90)
-    plt.legend(title="Биом")
+    plt.legend(title="Тип территории")
     save_figure("prob_top3_by_biome.png")
 
     # ===== Top-1 =====
@@ -146,9 +147,10 @@ def plot_topk_probability_by_biome():
         hue="biome"
     )
     plt.ylabel("Вероятность")
-    plt.title("Вероятность попасть в Топ-1 (bootstrap)")
+    plt.xlabel("Методы паншарпенинга")
+    plt.title("Вероятность попасть в Топ-1")
     plt.xticks(rotation=90)
-    plt.legend(title="Биом")
+    plt.legend(title="Тип территории")
     save_figure("prob_top1_by_biome.png")
 
 

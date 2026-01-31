@@ -48,9 +48,9 @@ def plot_boxplots():
             y="value",
             hue="method"
         )
-        plt.title(f"{metric} — распределение по биомам")
+        plt.title(f"{metric} — распределение по типам территории")
         plt.ylabel("Значение")
-        plt.xlabel("Биом")
+        plt.xlabel("Тип территории")
         plt.legend()
         plt.xticks(rotation=30)
         save_figure(f"boxplot_{metric}.png")

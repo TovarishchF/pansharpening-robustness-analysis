@@ -64,11 +64,11 @@ def plot_rank_heatmap():
         linewidths=0.5,
         linecolor="white"
     )
-    plt.title("Средний median rank по полигонам", fontsize=18)
+    plt.title("Медианный ранг по полигонам", fontsize=18)
     plt.yticks(fontsize=10)
     plt.ylabel("Полигоны", fontsize=14)
     plt.xticks(fontsize=10)
-    plt.xlabel("Методы ПШ", fontsize=14)
+    plt.xlabel("Методы паншарпенинга", fontsize=14)
     save_figure("heatmap_median_rank.png")
 
 
@@ -107,11 +107,11 @@ def plot_borda_scores():
         hue="biome",
         errorbar=None
     )
-    plt.title("Borda score по биомам")
+    plt.title("Borda score по типам территории")
     plt.ylabel("Borda score")
-    plt.xlabel("Методы ПШ")
+    plt.xlabel("Методы паншарпенинга")
     plt.xticks(rotation=90)
-    plt.legend(title="Биом")
+    plt.legend(title="Тип территории")
     save_figure("borda_by_biome.png")
 
     # ===== Median rank =====
@@ -123,11 +123,11 @@ def plot_borda_scores():
         hue="biome",
         errorbar=None
     )
-    plt.title("Median rank по биомам")
-    plt.ylabel("Median rank (меньше — лучше)")
-    plt.xlabel("Методы ПШ")
+    plt.title("Медианный ранг по типам территории")
+    plt.ylabel("Медианный ранг")
+    plt.xlabel("Методы паншарпенинга")
     plt.xticks(rotation=90)
-    plt.legend(title="Биом")
+    plt.legend(title="Тип территории")
     save_figure("median_rank_by_biome.png")
 
 if __name__ == "__main__":

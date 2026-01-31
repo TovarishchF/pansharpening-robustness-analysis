@@ -45,7 +45,7 @@ def plot_kendall_w():
     plt.title("Согласованность метрик (Kendall W)")
     plt.ylabel("Значение")
     plt.xlabel("Методы классификации")
-    plt.legend(title="Биом")
+    plt.legend(title="Тип территории")
     save_figure("kendall_w.png")
 
 
