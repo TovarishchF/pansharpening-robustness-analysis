@@ -9,7 +9,7 @@ Saint Petersburg State University (SPbU).*
 
 This repository contains the source code and methodology for the research project **"Statistical Analysis of Pansharpening Method Robustness for Landscape Classification"**.
 
-The study performs a comprehensive comparative analysis of various pansharpening algorithms, evaluating their spectral fidelity, spatial quality, and robustness across different biomes (urban, forest, agricultural) using a statistical framework. The ultimate goal is to provide data-driven recommendations for selecting optimal pansharpening methods to improve the accuracy of satellite image classification.
+The study performs a comprehensive comparative analysis of various pansharpening algorithms, evaluating their spectral fidelity, spatial quality, and robustness across different landcover types (urban, forest, agricultural) using a statistical framework. The ultimate goal is to provide data-driven recommendations for selecting optimal pansharpening methods to improve the accuracy of satellite image classification.
 
 ## 📖 Overview
 
