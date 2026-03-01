@@ -107,8 +107,8 @@ def plot_borda_scores():
         hue="biome",
         errorbar=None
     )
-    plt.title("Borda score по типам территории")
-    plt.ylabel("Borda score")
+    plt.title("Оценка Борды по типам территории")
+    plt.ylabel("Оценка Борды")
     plt.xlabel("Методы паншарпенинга")
     plt.xticks(rotation=90)
     plt.legend(title="Тип территории")

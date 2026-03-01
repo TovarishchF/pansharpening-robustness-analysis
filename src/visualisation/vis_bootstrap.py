@@ -94,7 +94,7 @@ def plot_bootstrap_ci():
         markersize=7
     )
 
-    plt.xlabel("Borda score")
+    plt.xlabel("Оценка Борды")
     plt.ylabel("Методы паншарпенинга")
     plt.title("Бутстреп доверительные интервалы (Borda score)")
     plt.grid(axis="x", linestyle="--", alpha=0.5)
