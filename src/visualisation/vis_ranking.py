@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import sys
 import os
+import yaml
 from pathlib import Path
 
 script_path = os.path.abspath(__file__)
@@ -20,12 +21,17 @@ DATA_PATH = (
 
 
 def plot_rank_heatmap():
+    """Тепловая карта медианных рангов по полигонам (с метками методов)"""
     setup_visual_style()
     data = load_json(DATA_PATH)
 
+    # Загрузка меток методов
+    config_path = root_dir / "config.yaml"
+    if config_path.exists():
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+        method_labels = config.get('method_labels')
     rows = []
-
-    # собираем ВСЕ median_rank со всех классификаторов и биомов
     for clf_name, clf_data in data["classifiers"].items():
         for biome_name, biome_data in clf_data.items():
             for poly, poly_data in biome_data["per_polygon"].items():
@@ -39,13 +45,10 @@ def plot_rank_heatmap():
                     })
 
     df = pd.DataFrame(rows)
-    
-    # сортируем для красивой легенды heatmap
+
     df["poly_id"] = df["polygon"].str.extract(r"(\d+)").astype(int)
     order = df.sort_values("poly_id")["polygon"].unique()
 
-    # КЛЮЧЕВОЙ МОМЕНТ:
-    # агрегируем дубликаты polygon+method
     pivot = pd.pivot_table(
         df,
         index="polygon",
@@ -53,6 +56,9 @@ def plot_rank_heatmap():
         values="median_rank",
         aggfunc="mean"
     ).reindex(order)
+
+    # Переименовываем колонки в соответствии с method_labels
+    pivot.rename(columns=method_labels, inplace=True)
 
     plt.figure(figsize=(18, 10))
     sns.heatmap(
@@ -68,22 +74,27 @@ def plot_rank_heatmap():
     plt.yticks(fontsize=10)
     plt.ylabel("Полигоны", fontsize=14)
     plt.xticks(fontsize=10)
-    plt.xlabel("Методы паншарпенинга", fontsize=14)
+    plt.xlabel("Алгоритмы паншарпенинга", fontsize=14)
     save_figure("heatmap_median_rank.png")
 
 
-
 def plot_borda_scores():
-    """
-    Строит barplot:
-    1) Borda score по биомам
-    2) Median rank по биомам
-    """
     setup_visual_style()
+
+    # Загрузка цветовой схемы и меток
+    config_path = root_dir / "config.yaml"
+    if config_path.exists():
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+        colors = config.get('colors', [])
+        biome_labels = config.get('biome_labels')
+        method_labels = config.get('method_labels')
+        biome_order = ['urban', 'forest', 'agriculture']
+        biome_colors_en = dict(zip(biome_order, colors))
+        biome_colors_ru = {biome_labels[k]: v for k, v in biome_colors_en.items()}
     data = load_json(DATA_PATH)
 
     rows = []
-
     for clf_name, clf_data in data["classifiers"].items():
         for biome_name, biome_data in clf_data.items():
             for poly_data in biome_data["per_polygon"].values():
@@ -97,6 +108,8 @@ def plot_borda_scores():
                     })
 
     df = pd.DataFrame(rows)
+    df['biome'] = df['biome'].map(biome_labels)
+    df['method'] = df['method'].map(method_labels)
 
     # ===== Borda score =====
     plt.figure(figsize=(18, 10))
@@ -105,13 +118,14 @@ def plot_borda_scores():
         x="method",
         y="borda",
         hue="biome",
-        errorbar=None
+        errorbar=None,
+        palette=biome_colors_ru
     )
     plt.title("Оценка Борды по типам территории")
     plt.ylabel("Оценка Борды")
-    plt.xlabel("Методы паншарпенинга")
-    plt.xticks(rotation=90)
-    plt.legend(title="Тип территории")
+    plt.xlabel("Алгоритмы паншарпенинга")
+    plt.xticks(rotation=60)
+    plt.legend(title="Тип покрытия земель")
     save_figure("borda_by_biome.png")
 
     # ===== Median rank =====
@@ -121,13 +135,14 @@ def plot_borda_scores():
         x="method",
         y="median_rank",
         hue="biome",
-        errorbar=None
+        errorbar=None,
+        palette=biome_colors_ru
     )
     plt.title("Медианный ранг по типам территории")
     plt.ylabel("Медианный ранг")
-    plt.xlabel("Методы паншарпенинга")
-    plt.xticks(rotation=90)
-    plt.legend(title="Тип территории")
+    plt.xlabel("Алгоритмы паншарпенинга")
+    plt.xticks(rotation=60)
+    plt.legend(title="Тип покрытия земель")
     save_figure("median_rank_by_biome.png")
 
 if __name__ == "__main__":

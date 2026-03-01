@@ -13,6 +13,35 @@ biomes:
   forest: "Лесные массивы"
   agriculture: "Сельскохозяйственные угодья"
 
+colors: [
+   "#dd0b00", # urban
+   "#259712", # forest
+   "#ffec4e" # agriculture
+  ]
+
+biome_labels: {
+        'urban': 'Урбанизированные территории',
+        'forest': 'Лесные территории',
+        'agriculture': 'Сельскохозяйственные территории'
+        }
+
+classifier_labels: {
+        'maximum_likelihood': 'Максимальное правдоподобие',
+        'random_forest': 'Случайный лес',
+        'xgboost': 'Градиентный бустинг'
+        }
+
+method_labels: {
+        'gram_schmidt': 'Gram-Schmidt',
+        'brovey': 'Brovey Transform',
+        'pracs': 'PRACS',
+        'atwt': 'ATWT',
+        'gram_schmidt_adaptive': 'GS2',
+        'hpf': 'HPF',
+        'sfim': 'SFIM',
+        'bt_h': 'BT-H',
+        'pca': 'PCA'
+        }
 
 landsat:
   ms_bands: [2, 3, 4, 5, 6, 7]  # B2-B7
