@@ -21,8 +21,8 @@ colors: [
 
 biome_labels: {
         'urban': 'Урбанизированные территории',
-        'forest': 'Лесные территории',
-        'agriculture': 'Сельскохозяйственные территории'
+        'forest': 'Лесные массивы',
+        'agriculture': 'Сельскохозяйственные угодья'
         }
 
 classifier_labels: {

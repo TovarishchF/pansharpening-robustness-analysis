@@ -48,13 +48,14 @@ def plot_kendall_w():
 
     df = pd.DataFrame(rows)
     df['biome'] = df['biome'].map(biome_labels)
-    df['classifier'] = df['classifier'].map(classifier_labels)   # ← добавлено
+    df['classifier'] = df['classifier'].map(classifier_labels)
 
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(10, 8))
     sns.barplot(
         data=df,
         x="classifier",
         y="kendall_w",
+        width=0.4,
         hue="biome",
         palette=biome_colors_ru
     )
